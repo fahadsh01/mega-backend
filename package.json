@@ -1,0 +1,11 @@
+{
+  "name": "mega-project-backend",
+  "version": "1.0.0",
+  "description": "mega project backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "fahad shahzad",
+  "license": "ISC"
+}
