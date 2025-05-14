@@ -14,11 +14,13 @@ app.use(express.urlencoded({ limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-// import routes
-
 import router from "./Routes/user.routes.js";
 
 // routes declaration
 app.use("/api/v1/users", router);
+
+app.get("/", (req, res) => {
+  res.send("API is running");
+});
 
 export default app;
