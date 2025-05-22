@@ -42,7 +42,7 @@ const userSchema = new Schema(
       type: String,
       required: [true, "password is required"],
     },
-    refreshTocken: {
+    refreshToken: {
       type: String,
     },
   },
@@ -75,9 +75,9 @@ userSchema.methods.generateRefreshToken = function () {
     {
       _id: this._id,
     },
-    process.env.ACCESS_REFRESH_SECRET,
+    process.env.REFRESH_TOKEN_SECRET,
     {
-      expiresIn: process.env.ACCESS_REFRESH_EXPIRY,
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
     }
   );
 };
