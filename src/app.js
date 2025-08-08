@@ -9,16 +9,20 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json({ limit: "16kb" }));
-app.use(express.urlencoded({ limit: "16kb" }));
+app.use(express.json({ limit: "60kb" }));
+app.use(express.urlencoded({ limit: "60kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-import router from "./Routes/user.routes.js";
-
+import user from "./Routes/user.routes.js";
+import blog from "./Routes/blog.routes.js";
+import Contact from "./Routes/contactus.routes.js";
+import subscriber from "./Routes/subs.routes.js";
 // routes declaration
-app.use("/api/v1/users", router);
-
+app.use("/api/v1/users", user);
+app.use("/api/v1/blog", blog);
+app.use("/api/v1/contact", Contact);
+app.use("/api/v1/subscriber", subscriber);
 app.get("/", (req, res) => {
   res.send("API is running");
 });

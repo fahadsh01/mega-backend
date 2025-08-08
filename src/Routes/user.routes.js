@@ -4,18 +4,14 @@ import {
   logoutUser,
   register,
   refreshAccessToken,
+  changeOldPassword,
 } from "../controllers/register.controllers.js";
-import { upload } from "../middlewares/multer.middleware.js";
 import { verifyjwt } from "../middlewares/auth.js";
-const router = Router();
-router.route("/register").post(
-  upload.fields([
-    { name: "avatar", maxCount: 1 },
-    { name: "coverimage", maxCount: 1 },
-  ]),
-  register
-);
-router.route("/login").post(loginUser);
-router.route("/logout").post(verifyjwt, logoutUser);
-router.route("/refresh-Token").post(refreshAccessToken);
-export default router;
+const user = Router();
+user.route("/register").post(register);
+user.route("/login").post(loginUser);
+user.route("/logout").post(verifyjwt, logoutUser);
+user.route("/refreshAccessToken").post(refreshAccessToken);
+user.route("/change-password").post(verifyjwt, changeOldPassword);
+
+export default user;

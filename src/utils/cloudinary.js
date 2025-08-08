@@ -20,5 +20,22 @@ const fileuploader = async (file) => {
     return null;
   }
 };
+const deleteFile = async (publicId) => {
+  try {
+    if (!publicId) return null;
 
-export { fileuploader };
+    const result = await cloudinary.uploader.destroy(publicId);
+
+    if (result.result !== "ok") {
+      console.warn(`Cloudinary did not delete the image: ${publicId}`);
+    } else {
+      console.log(`Image deleted: ${publicId}`);
+    }
+    return result;
+  } catch (error) {
+    console.error("Error deleting image from Cloudinary:", error.message);
+    return null;
+  }
+};
+
+export { fileuploader, deleteFile };

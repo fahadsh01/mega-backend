@@ -2,8 +2,8 @@ import asynchandler from "../utils/asynchandler.js";
 import { ApiError } from "../utils/apierrors.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { fileuploader } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessandRefreshToken = async (userId) => {
   try {
@@ -23,53 +23,18 @@ const generateAccessandRefreshToken = async (userId) => {
 };
 
 const register = asynchandler(async (req, res) => {
-  const { fullname, username, email, password } = req.body;
-  if (
-    [fullname, username, email, password].some(
-      (fields) => fields?.trim() === ""
-    )
-  ) {
+  const { fullname, email, password } = req.body;
+  if ([fullname, email, password].some((fields) => fields?.trim() === "")) {
     throw new ApiError(400, "All the fields are required ");
   }
-  const userexisted = await User.findOne({
-    $or: [{ username }, { email }],
-  });
-  if (userexisted) {
-    throw new ApiError(409, "The user  with email or username already exists");
-  }
-  const avatarlocalpath = req.files?.avatar[0]?.path;
-  const coverimagelocalpath = req.files?.coverimage[0]?.path;
-
-  if (!avatarlocalpath) {
-    throw new ApiError(400, "Avatar is required ");
-  }
-
-  const avatar = await fileuploader(avatarlocalpath);
-  const coverimage = await fileuploader(coverimagelocalpath);
-
-  if (!avatar) {
-    throw new ApiError(400, "Avatar file is required ");
-  }
-
   const newUser = await User.create({
     fullname,
     password,
     email,
-    username: username.toLowerCase(),
-    avatar: avatar.url,
-    coverimage: coverimage?.url,
   });
-
-  const CreatedUser = await User.findById(newUser._id).select(
-    "-password -refreshTocken"
-  );
-  if (!CreatedUser) {
-    throw new ApiError(500, "something went wrong while registring the user ");
-  }
-
   return res
     .status(201)
-    .json(new ApiResponse(200, CreatedUser, "user registerd successfully "));
+    .json(new ApiResponse(200, newUser, "user registerd successfully "));
 });
 const loginUser = asynchandler(async (req, res) => {
   const { email, username, password } = req.body;
@@ -117,7 +82,7 @@ const logoutUser = asynchandler(async (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: { refreshToken: undefined },
+      $unset: { refreshToken: 1 },
     },
     {
       new: true,
@@ -174,5 +139,27 @@ const refreshAccessToken = asynchandler(async (req, res) => {
     throw new ApiError(401, error?.message || "invalid refresh Token ");
   }
 });
+const changeOldPassword = asynchandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError(400, "user Not found ");
+  }
+  const isMatch = await user.ispasswordcorrect(oldPassword);
+  if (!isMatch) {
+    throw new ApiError(401, "invalid Old Password  ");
+  }
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password is updated sucussfully"));
+});
 
-export { register, loginUser, logoutUser, refreshAccessToken };
+export {
+  register,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  changeOldPassword,
+};
